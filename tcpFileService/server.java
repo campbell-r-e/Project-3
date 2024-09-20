@@ -39,11 +39,11 @@ public class server {
                     }
                     String replymessage;
                     if(sucess){
-                        replymessage = "s";
+                        replymessage = "S";
 
                     }
                     else{
-                        replymessage = "f";
+                        replymessage = "F";
 
                     }
                     ByteBuffer reply = ByteBuffer.wrap(replymessage.getBytes());
