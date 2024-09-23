@@ -26,14 +26,14 @@ public class TCPFileClient {
                     System.out.println("Enter file name");
                     String fileName = keyboard.nextLine();
                     ByteBuffer request = ByteBuffer.wrap((command + fileName).getBytes());
-                    SocketChannel channe = SocketChannel.open();
-                    channe.connect(new InetSocketAddress(args[0], serverPort));
-                    channe.write(request);
-                    channe.shutdownOutput();
+                    SocketChannel channel = SocketChannel.open();
+                    channel.connect(new InetSocketAddress(args[0], serverPort));
+                    channel.write(request);
+                    channel.shutdownOutput();
                      // todo: receive server code and tell the user.
                     ByteBuffer reply = ByteBuffer.allocate(1);
-                    channe.read(reply);
-                    channe.close();
+                    channel.read(reply);
+                    channel.close();
                     reply.flip();
                     byte[]a = new byte[1];
                     reply.get(a);
@@ -55,6 +55,34 @@ public class TCPFileClient {
 
                     break;
                 case "R": // rename
+                    System.out.println("Enter original file name: ");
+                    String originalFileName = keyboard.nextLine();
+                    System.out.println("Enter new file name: ");
+                    String newFileName = keyboard.nextLine();
+
+                    // Send the rename request
+                    SocketChannel renameChannel = SocketChannel.open();
+                    renameChannel.connect(new InetSocketAddress(args[0], serverPort));
+                    ByteBuffer renameRequest = ByteBuffer.wrap(("R" + originalFileName + "|" + newFileName).getBytes());
+                    renameChannel.write(renameRequest);
+                    renameChannel.shutdownOutput();
+
+                    // Receive server response
+                    ByteBuffer renameReply = ByteBuffer.allocate(1);
+                    renameChannel.read(renameReply);
+                    renameChannel.close();
+                    renameReply.flip();
+                    byte[] renameResponse = new byte[1];
+                    renameReply.get(renameResponse);
+                    String renameCode = new String(renameResponse);
+
+                    if (renameCode.equals("S")) {
+                        System.out.println("File renamed successfully");
+                    } else if (renameCode.equals("F")) {
+                        System.out.println("Failed to rename file");
+                    } else {
+                        System.out.println("Invalid server code received");
+                    }
                     break;
 
                 case "U": // upload
@@ -149,12 +177,12 @@ public class TCPFileClient {
 
             }// end of switch statement
 
-        }
+        }//end of do-while loop
         while (!command.equals("Q"));{
 
 
         }
 
 
-    }
-}
+    }//end of PSVM
+}//end of class
