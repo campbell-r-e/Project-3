@@ -62,50 +62,32 @@ public class server {
                 String ogFilename = new String(r);
                 String newFileName=new String(r);
                 File rfile = new File("ServerFiles/"+ogFilename);
-                File rfilenew = new File("ServerFiles/"+ogFilename);
-                boolean rsucess = rfile.renameTo(rfilenew); 
+                File rfilenew = new File("ServerFiles/"+newFileName);
                 
+                String rreplymessage;
                
                 if(rfile.exists()){
-                   
+                    boolean rsucess = rfile.renameTo(rfilenew); 
+                    if(rsucess){
+                        rreplymessage = "S";
+    
+                    }
+                    else{
+                        rreplymessage = "F";
+    
+                    }
 
 
                 }
-                String rreplymessage;
-                if(rsucess){
-                    rreplymessage = "S";
-
+                else {
+                    rreplymessage = "F"; 
                 }
-                else{
-                    rreplymessage = "F";
-
-                }
+              
+               
                 ByteBuffer rreply = ByteBuffer.wrap(rreplymessage.getBytes());
                 serveChannel.write(rreply);
                 serveChannel.close();
-
-                 
-
-
-                // Send the rename request
-               // SocketChannel renameChannel = SocketChannel.open();
-                //renameChannel.connect(new InetSocketAddress(args[0], serverPort));
-                //ByteBuffer renameRequest = ByteBuffer.wrap(("R" + originalFileName + "|" + newFileName).getBytes());
-                //renameChannel.write(renameRequest);
-                // renameChannel.shutdownOutput();
-
-
-
-
-                
-              
-              
-
-              
-
-                
-                
-                    break;
+                break;
                 case "U":
                     break;
                 case "G":
