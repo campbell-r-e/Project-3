@@ -1,11 +1,10 @@
 package tcpFileService;
-
-import java.io.File;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Scanner;
+
+import java.io.*;
 
 public class server {
     public static void main(String[] args) throws  Exception{
@@ -56,7 +55,8 @@ public class server {
                     break;
                 case "L":
 
-                
+
+
                     break;
                 case "R":
                 byte[]r= new byte[request.remaining()];
@@ -85,10 +85,61 @@ public class server {
                 serveChannel.write(rreply);
                 serveChannel.close();
                 break;
+                
+                
+                
+                
                 case "U":
+
+                byte[]u= new byte[request.remaining()];
+                request.get(u);
+              
+                String uFilename = new String(u);
+                BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream("ServerFiles/" + new String(uFilename)));
+
+                int bytesRead = 0;
+                ByteBuffer fileDataBuffer = ByteBuffer.allocate(1024); 
+              
+                while((bytesRead = serveChannel.read(fileDataBuffer))!= -1){
+                    fileDataBuffer.flip();
+                    byte[] datapacket = new byte[bytesRead];
+                    fileDataBuffer.get(datapacket);
+                    fos.write(datapacket);
+            
+                    fileDataBuffer.clear();
+    
+    
+                }
+                fos.close();
+                
+
+            File w = new File("ServerFiles/" + new String(uFilename)); 
+  
+             String ureplys;
+               
+                if(w.exists()){
+                    ureplys = "S";
+                }
+                else{
+                    ureplys = "F";
+                }
+
+                ByteBuffer ureply = ByteBuffer.wrap(ureplys.getBytes());
+                serveChannel.write(ureply);
+                serveChannel.close();
+                
+               
                     break;
                 case "G":
-                    break;
+                 
+
+
+
+                
+                  
+              
+           
+                break;
                 default:
                     System.out.println("Invalid Command");
             }
