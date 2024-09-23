@@ -55,6 +55,8 @@ public class server {
 
                     break;
                 case "L":
+
+                
                     break;
                 case "R":
                 byte[]r= new byte[request.remaining()];
@@ -75,15 +77,10 @@ public class server {
                     else{
                         rreplymessage = "F";
     
-                    }
-
-
-                }
+                    }}
                 else {
                     rreplymessage = "F"; 
                 }
-              
-               
                 ByteBuffer rreply = ByteBuffer.wrap(rreplymessage.getBytes());
                 serveChannel.write(rreply);
                 serveChannel.close();
