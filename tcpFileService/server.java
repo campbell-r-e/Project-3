@@ -100,7 +100,7 @@ public class server {
                 int bytesRead = 0;
                 ByteBuffer fileDataBuffer = ByteBuffer.allocate(1024); 
               
-                while((bytesRead = serveChannel.read(fileDataBuffer))!= -1){
+                while((bytesRead = serveChannel.read(fileDataBuffer))>0){
                     fileDataBuffer.flip();
                     byte[] datapacket = new byte[bytesRead];
                     fileDataBuffer.get(datapacket);
@@ -131,6 +131,8 @@ public class server {
                
                     break;
                 case "G":
+
+
                  
 
 
