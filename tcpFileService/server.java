@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Scanner;
 
 public class server {
     public static void main(String[] args) throws  Exception{
@@ -56,6 +57,54 @@ public class server {
                 case "L":
                     break;
                 case "R":
+                byte[]r= new byte[request.remaining()];
+                request.get(r);
+                String ogFilename = new String(r);
+                String newFileName=new String(r);
+                File rfile = new File("ServerFiles/"+ogFilename);
+                File rfilenew = new File("ServerFiles/"+ogFilename);
+                boolean rsucess = rfile.renameTo(rfilenew); 
+                
+               
+                if(rfile.exists()){
+                   
+
+
+                }
+                String rreplymessage;
+                if(rsucess){
+                    rreplymessage = "S";
+
+                }
+                else{
+                    rreplymessage = "F";
+
+                }
+                ByteBuffer rreply = ByteBuffer.wrap(rreplymessage.getBytes());
+                serveChannel.write(rreply);
+                serveChannel.close();
+
+                 
+
+
+                // Send the rename request
+               // SocketChannel renameChannel = SocketChannel.open();
+                //renameChannel.connect(new InetSocketAddress(args[0], serverPort));
+                //ByteBuffer renameRequest = ByteBuffer.wrap(("R" + originalFileName + "|" + newFileName).getBytes());
+                //renameChannel.write(renameRequest);
+                // renameChannel.shutdownOutput();
+
+
+
+
+                
+              
+              
+
+              
+
+                
+                
                     break;
                 case "U":
                     break;
