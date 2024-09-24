@@ -3,7 +3,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.io.*;
 
 public class server {
@@ -54,6 +55,22 @@ public class server {
 
                     break;
                 case "L":
+                
+                
+                
+                
+                
+                File server_folder = new File("ServerFiles");   // came from stack overflow 
+                ArrayList<File> listOfServerFiles = new ArrayList<>(Arrays.asList(server_folder.listFiles()));
+                 
+                String s = listOfServerFiles.toString();
+                 ByteBuffer Lreply = ByteBuffer.wrap(s.getBytes());
+                 serveChannel.write(Lreply);
+                 serveChannel.close();
+ 
+
+
+                   
 
 
 
