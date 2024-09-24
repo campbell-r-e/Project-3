@@ -55,40 +55,39 @@ public class server {
 
                     break;
                 case "L":
-                File server_folder = new File("ServerFiles");   // came from stack overflow
-                ArrayList<File> listOfServerFiles = new ArrayList<>(Arrays.asList(server_folder.listFiles()));
-                 
-                String s = listOfServerFiles.toString();
-                String server_reseponceL;
+                    File serverFolder = new File("ServerFiles");
+                    File[] files = serverFolder.listFiles();
+                    String serverResponseL;
 
+                    if (files != null && files.length > 0) {
+                        // Convert the file list to a string
+                        ArrayList<File> listOfServerFiles = new ArrayList<>(Arrays.asList(files));
+                        String fileListString = listOfServerFiles.toString();
 
-                if(s!=null){
-                    server_reseponceL = "S";
-                    ByteBuffer Lreply = ByteBuffer.wrap(s.getBytes());
-                    serveChannel.write(Lreply);
-                    //serveChannel.close();
+                        // Send success code "S" first
+                        serverResponseL = "S";
+                        ByteBuffer successReply = ByteBuffer.wrap(serverResponseL.getBytes());
+                        serveChannel.write(successReply);
 
+                        // Send the file list as a second response
+                        ByteBuffer fileListReply = ByteBuffer.wrap(fileListString.getBytes());
+                        serveChannel.write(fileListReply);
 
-                    ByteBuffer Lreplyonce = ByteBuffer.wrap(server_reseponceL.getBytes());
-                    serveChannel.write(Lreplyonce);
-                    serveChannel.close();
-    
-                }else{
-                 server_reseponceL = "F";
-                 ByteBuffer Lrespionce = ByteBuffer.wrap(server_reseponceL.getBytes());
-                 serveChannel.write(Lrespionce);
-                 serveChannel.close();
- 
-                }
-                 
- 
+                        // Close the channel properly
+                        serveChannel.shutdownOutput();
+                        serveChannel.close();
+                    } else {
+                        // If no files or folder doesn't exist, send failure code "F"
+                        serverResponseL = "F";
+                        ByteBuffer failureReply = ByteBuffer.wrap(serverResponseL.getBytes());
+                        serveChannel.write(failureReply);
 
-
-                   
-
-
-
+                        // Close the channel properly
+                        serveChannel.shutdownOutput();
+                        serveChannel.close();
+                    }
                     break;
+
                 case "R":
                 byte[]r= new byte[request.remaining()];
                 request.get(r);
