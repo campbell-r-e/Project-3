@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.concurrent.Delayed;
 //import java.util.Arrays;
 import java.io.*;
 
@@ -140,8 +141,12 @@ public class server {
                             String uFilename = new String(u).trim();
 
                             // Ensure directories and create the file output stream
+                            //String fileSavePath = "ServerFiles" + uFilename;  // used to have /
                             String fileSavePath = "ServerFiles/" + uFilename;
                             File directory = new File("ServerFiles");
+                            if(!directory.exists()){
+                                directory.mkdir();
+                            }
                             try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(fileSavePath))) {
                                 // Buffer to read file data from the client
                                 ByteBuffer fileDataBuffer = ByteBuffer.allocate(1024);
@@ -157,6 +162,7 @@ public class server {
 
                                 // Confirm file upload success
                                 File uploadedFile = new File(fileSavePath);
+                                
                                 String ureplyMessage = uploadedFile.exists() ? "S" : "F";
                                 ByteBuffer ureply = ByteBuffer.wrap(ureplyMessage.getBytes());
                                 serveChannel.write(ureply);
@@ -165,6 +171,7 @@ public class server {
                                 System.err.println("File write error: " + e.getMessage());
                                 ByteBuffer errorReply = ByteBuffer.wrap("F".getBytes());
                                 serveChannel.write(errorReply);
+                                e.printStackTrace();
                             }
 
                             serveChannel.shutdownOutput();
@@ -182,6 +189,10 @@ public class server {
                                 serveChannel.shutdownOutput();
                                 break;
                             }
+                             ///
+                             ByteBuffer successCode = ByteBuffer.wrap("S".getBytes());
+                             serveChannel.write(successCode);
+                             /////
 
                             try (FileInputStream gfis = new FileInputStream(gfile)) {
                                 byte[] gbuffer = new byte[1024];
@@ -190,10 +201,9 @@ public class server {
                                     ByteBuffer fileData = ByteBuffer.wrap(gbuffer, 0, dbytesRead);
                                     serveChannel.write(fileData);
                                 }
+                               serveChannel.shutdownOutput();
 
-                                ByteBuffer greply = ByteBuffer.wrap("S".getBytes());
-                                serveChannel.write(greply);
-                                serveChannel.shutdownOutput();
+                             
 
                             } catch (IOException e) {
                                 System.err.println("File read error: " + e.getMessage());

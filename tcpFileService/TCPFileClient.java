@@ -194,7 +194,7 @@ public class TCPFileClient {
 
                             if (downloadCode.equals("S")) {
                                 System.out.println("Receiving file...");
-                                try (FileOutputStream fos = new FileOutputStream("downloaded_" + fileToDownload)) {
+                                try (FileOutputStream fos = new FileOutputStream("ClientFiles/"+"downloaded_" + fileToDownload)) {
                                     ByteBuffer fileBuffer = ByteBuffer.allocate(1024);
 
                                     // Read and write the file data in chunks of 1KB
