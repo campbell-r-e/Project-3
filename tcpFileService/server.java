@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.io.*;
 
 public class server {
@@ -46,7 +46,7 @@ public class server {
                             String Filename = new String(d).trim();  // Added trimming for safety
                             System.out.println("File to delete: " + Filename);
 
-                            File file = new File("ServerFiles/" + Filename);
+                            File file = new File("../ServerFiles/" + Filename);
                             Boolean success = false;
                             if (file.exists() && file.isFile()) {
                                 success = file.delete();
@@ -59,7 +59,7 @@ public class server {
                             break;
 
                         case "L":
-                            File serverFolder = new File("ServerFiles");
+                            File serverFolder = new File("../ServerFiles");
                             if (!serverFolder.exists() || !serverFolder.isDirectory()) {
                                 ByteBuffer failureReply = ByteBuffer.wrap("F".getBytes());
                                 serveChannel.write(failureReply);
@@ -99,7 +99,7 @@ public class server {
                             String receivedString = new String(r).trim(); // Convert byte array to string and trim whitespace
 
                             // Split the received string by a comma to get the original and new filenames
-                            String[] filenames = receivedString.split(",");
+                            String[] filenames = receivedString.split("|");
 
                             // Ensure the split resulted in exactly two filenames (original and new)
                             if (filenames.length != 2) {
@@ -115,8 +115,8 @@ public class server {
                             String newFileName = filenames[1].trim();
 
                             // Define file paths based on the ServerFiles directory
-                            File rfile = new File("ServerFiles/" + ogFilename);
-                            File rfilenew = new File("ServerFiles/" + newFileName);
+                            File rfile = new File("../ServerFiles/" + ogFilename);
+                            File rfilenew = new File("../ServerFiles/" + newFileName);
 
                             String rreplymessage;
 
@@ -141,7 +141,7 @@ public class server {
 
                             // Ensure directories and create the file output stream
                             String fileSavePath = "ServerFiles/" + uFilename;
-                            File directory = new File("ServerFiles");
+                            File directory = new File("../ServerFiles");
                             try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(fileSavePath))) {
                                 // Buffer to read file data from the client
                                 ByteBuffer fileDataBuffer = ByteBuffer.allocate(1024);
@@ -174,7 +174,7 @@ public class server {
                             byte[] G = new byte[request.remaining()];
                             request.get(G);
                             String GFilename = new String(G).trim();
-                            File gfile = new File("ServerFiles/" + GFilename);
+                            File gfile = new File("../ServerFiles/" + GFilename);
 
                             if (!gfile.exists() || !gfile.isFile()) {
                                 ByteBuffer greply = ByteBuffer.wrap("F".getBytes());
