@@ -142,10 +142,6 @@ public class server {
                             // Ensure directories and create the file output stream
                             String fileSavePath = "ServerFiles/" + uFilename;
                             File directory = new File("ServerFiles");
-                            if (!directory.exists()) {
-                                directory.mkdirs();
-                            }
-
                             try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(fileSavePath))) {
                                 // Buffer to read file data from the client
                                 ByteBuffer fileDataBuffer = ByteBuffer.allocate(1024);
