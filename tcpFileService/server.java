@@ -66,7 +66,7 @@ public class server {
                     server_reseponceL = "S";
                     ByteBuffer Lreply = ByteBuffer.wrap(s.getBytes());
                     serveChannel.write(Lreply);
-                    serveChannel.close();
+                    //serveChannel.close();
 
 
                     ByteBuffer Lreplyonce = ByteBuffer.wrap(server_reseponceL.getBytes());
