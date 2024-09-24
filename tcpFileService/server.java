@@ -11,20 +11,27 @@ public class server {
     public static void main(String[] args) throws  Exception{
         ServerSocketChannel Listenchannel= ServerSocketChannel.open();
         Listenchannel.bind(new InetSocketAddress(3000));
+        String command = null;
         while(true) {
             // to keep server
             SocketChannel serveChannel = Listenchannel.accept();
             ByteBuffer request = ByteBuffer.allocate(1024);
-            //int numBytes = serveChannel.read(request);
-            request.flip();
+            int numBytes = serveChannel.read(request);
+            if (numBytes > 0) {
+                // Prepare the buffer to be read
+                request.flip();
+            
+           
 
             // Size of byte array should match number bytes for command
 
             byte[] a = new byte[1];
             request.get(a);
-            String command = new String(a);
+            command = new String(a);
             System.out.println("\n recieved command:"+command);
-
+            request.clear();
+            }
+                if (command != null) {
             switch (command){
                 case "D":
                     byte[]d= new byte[request.remaining()];
@@ -91,8 +98,9 @@ public class server {
                 case "R":
                 byte[]r= new byte[request.remaining()];
                 request.get(r);
-                String ogFilename = new String(r);
-                String newFileName=new String(r);
+                String[] filenames = new String(r).split(","); 
+                String ogFilename = filenames[0].trim();
+                String newFileName = filenames[1].trim();
                 File rfile = new File("ServerFiles/"+ogFilename);
                 File rfilenew = new File("ServerFiles/"+newFileName);
                 
@@ -220,6 +228,9 @@ public class server {
             }
 
         }
+    
 
     }
 }
+}
+
