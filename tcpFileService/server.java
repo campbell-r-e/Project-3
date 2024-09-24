@@ -64,9 +64,28 @@ public class server {
                 ArrayList<File> listOfServerFiles = new ArrayList<>(Arrays.asList(server_folder.listFiles()));
                  
                 String s = listOfServerFiles.toString();
-                 ByteBuffer Lreply = ByteBuffer.wrap(s.getBytes());
-                 serveChannel.write(Lreply);
+                String server_reseponceL;
+
+
+                if(s!=null){
+                    server_reseponceL = "S";
+                    ByteBuffer Lreply = ByteBuffer.wrap(s.getBytes());
+                    serveChannel.write(Lreply);
+                    serveChannel.close();
+
+
+                    ByteBuffer Lreplyonce = ByteBuffer.wrap(server_reseponceL.getBytes());
+                    serveChannel.write(Lreplyonce);
+                    serveChannel.close();
+    
+                }else{
+                 server_reseponceL = "F";
+                 ByteBuffer Lrespionce = ByteBuffer.wrap(server_reseponceL.getBytes());
+                 serveChannel.write(Lrespionce);
                  serveChannel.close();
+ 
+                }
+                 
  
 
 
