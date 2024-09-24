@@ -30,7 +30,6 @@ public class TCPFileClient {
                     channel.connect(new InetSocketAddress(args[0], serverPort));
                     channel.write(request);
                     channel.shutdownOutput();
-                     // todo: receive server code and tell the user.
                     ByteBuffer reply = ByteBuffer.allocate(1);
                     channel.read(reply);
                     channel.close();
@@ -52,6 +51,31 @@ public class TCPFileClient {
 
                     break;
                 case "L"://list
+                    // Send the rename request
+                    SocketChannel listChannel = SocketChannel.open();
+                    listChannel.connect(new InetSocketAddress(args[0], serverPort));
+                    ByteBuffer listRequest = ByteBuffer.wrap(("L" + listChannel + "|").getBytes());
+                    listChannel.write(listRequest);
+                    listChannel.shutdownOutput();
+
+                    // Receive server response
+                    ByteBuffer listReply = ByteBuffer.allocate(1);
+                    listChannel.read(listReply);
+                    listChannel.close();
+                    listReply.flip();
+                    byte[] listResponse = new byte[1];
+                    listReply.get(listResponse);
+                    String listCode = new String(listResponse);
+
+                    if (listCode.equals("S")) {
+                        System.out.println("File renamed successfully");
+                    } else if (listCode.equals("F")) {
+                        System.out.println("Failed to rename file");
+                    } else {
+                        System.out.println("Invalid server code received");
+                    }
+
+
 
                     break;
                 case "R": // rename
@@ -184,5 +208,5 @@ public class TCPFileClient {
         }
 
 
-    }//end of PSVM
+    }//end of Main Method
 }//end of class

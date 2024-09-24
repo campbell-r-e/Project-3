@@ -55,12 +55,7 @@ public class server {
 
                     break;
                 case "L":
-                
-                
-                
-                
-                
-                File server_folder = new File("ServerFiles");   // came from stack overflow 
+                File server_folder = new File("ServerFiles");   // came from stack overflow
                 ArrayList<File> listOfServerFiles = new ArrayList<>(Arrays.asList(server_folder.listFiles()));
                  
                 String s = listOfServerFiles.toString();
