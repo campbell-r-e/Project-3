@@ -14,7 +14,7 @@ public class server {
             // to keep server
             SocketChannel serveChannel = Listenchannel.accept();
             ByteBuffer request = ByteBuffer.allocate(1024);
-            int numBytes = serveChannel.read(request);
+            //int numBytes = serveChannel.read(request);
             request.flip();
 
             // Size of byte array should match number bytes for command
@@ -89,7 +89,7 @@ public class server {
                 
                 
                 
-                case "U":
+                case "U": // upload
 
                 byte[]u= new byte[request.remaining()];
                 request.get(u);
@@ -130,10 +130,53 @@ public class server {
                 
                
                     break;
-                case "G":
+                case "G":  // download
+                String greplys;
 
+                byte[]G= new byte[request.remaining()];
+                request.get(G);
+                String GFilename = new String(G);
+                File gfile = new File("ServerFiles/" + GFilename);
 
-                 
+                if (!gfile.exists()) {
+                    greplys = "F";
+                    System.out.println("File does not exist.");
+                    ByteBuffer greply = ByteBuffer.wrap(greplys.getBytes());
+                    serveChannel.write(greply);
+                    serveChannel.close();
+
+                    break;
+                }
+
+               
+                
+                FileInputStream gfis = new FileInputStream(GFilename);
+               
+
+              
+                byte[] gbuffer = new byte[1024];
+                int dbytesRead;
+                while ((dbytesRead = gfis.read(gbuffer)) > 0) {
+                    ByteBuffer fileData = ByteBuffer.wrap(gbuffer, 0, dbytesRead);
+                    serveChannel.write(fileData);
+                    //fileData.clear();
+                }
+                gfis.close();
+                
+
+               
+
+                
+               
+                
+                greplys = "S";
+                
+                
+
+                ByteBuffer greply = ByteBuffer.wrap(greplys.getBytes());
+                serveChannel.write(greply);
+                serveChannel.shutdownOutput();
+                serveChannel.close();
 
 
 
