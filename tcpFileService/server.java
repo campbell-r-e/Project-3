@@ -1,4 +1,5 @@
 package tcpFileService;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
@@ -8,229 +9,213 @@ import java.util.Arrays;
 import java.io.*;
 
 public class server {
-    public static void main(String[] args) throws  Exception{
-        ServerSocketChannel Listenchannel= ServerSocketChannel.open();
+    public static void main(String[] args) throws Exception {
+        ServerSocketChannel Listenchannel = ServerSocketChannel.open();
         Listenchannel.bind(new InetSocketAddress(3000));
         String command = null;
-        while(true) {
-            // to keep server
-            SocketChannel serveChannel = Listenchannel.accept();
-            ByteBuffer request = ByteBuffer.allocate(1024);
-            int numBytes = serveChannel.read(request);
-            if (numBytes > 0) {
-                // Prepare the buffer to be read
-                request.flip();
-            
-           
 
-            // Size of byte array should match number bytes for command
+        while (true) {
+            // Keep the server running
+            try (SocketChannel serveChannel = Listenchannel.accept()) {
+                ByteBuffer request = ByteBuffer.allocate(1024);
+                int numBytes = serveChannel.read(request);
 
-            byte[] a = new byte[1];
-            request.get(a);
-            command = new String(a);
-            System.out.println("\n recieved command:"+command);
-            request.clear();
-            }
+                // Check if the client sent any data
+                if (numBytes == -1) {
+                    System.out.println("Client closed connection.");
+                    serveChannel.close();
+                    continue;
+                }
+
+                if (numBytes > 0) {
+                    // Prepare the buffer to be read
+                    request.flip();
+
+                    // Size of byte array should match the number of bytes for the command
+                    byte[] a = new byte[1];
+                    request.get(a);
+                    command = new String(a);
+                    System.out.println("\nReceived command: " + command);
+                }
+
                 if (command != null) {
-            switch (command){
-                case "D":
-                    byte[]d= new byte[request.remaining()];
-                    request.get(d);
-                    String Filename = new String(d);
-                    System.out.println("File to delte"+Filename);
-                    File file = new File("ServerFiles/"+Filename);
-                    Boolean sucess = false;
-                    if(file.exists()){
-                        sucess = file.delete();
+                    switch (command) {
+                        case "D":
+                            byte[] d = new byte[request.remaining()];
+                            request.get(d);
+                            String Filename = new String(d).trim();  // Added trimming for safety
+                            System.out.println("File to delete: " + Filename);
 
+                            File file = new File("ServerFiles/" + Filename);
+                            Boolean success = false;
+                            if (file.exists() && file.isFile()) {
+                                success = file.delete();
+                            }
 
+                            String replymessage = success ? "S" : "F";
+                            ByteBuffer reply = ByteBuffer.wrap(replymessage.getBytes());
+                            serveChannel.write(reply);
+                            serveChannel.shutdownOutput();
+                            break;
+
+                        case "L":
+                            File serverFolder = new File("ServerFiles");
+                            if (!serverFolder.exists() || !serverFolder.isDirectory()) {
+                                ByteBuffer failureReply = ByteBuffer.wrap("F".getBytes());
+                                serveChannel.write(failureReply);
+                                serveChannel.shutdownOutput();
+                                break;
+                            }
+
+                            File[] files = serverFolder.listFiles();
+                            if (files != null && files.length > 0) {
+                                // Convert the file list to a string
+                                ArrayList<String> listOfServerFiles = new ArrayList<>();
+                                for (File f : files) {
+                                    if (f.isFile()) {
+                                        listOfServerFiles.add(f.getName());
+                                    }
+                                }
+                                String fileListString = String.join(",", listOfServerFiles);
+
+                                // Send success code "S" first
+                                ByteBuffer successReply = ByteBuffer.wrap("S".getBytes());
+                                serveChannel.write(successReply);
+
+                                // Send the file list as a second response
+                                ByteBuffer fileListReply = ByteBuffer.wrap(fileListString.getBytes());
+                                serveChannel.write(fileListReply);
+                            } else {
+                                // If no files or folder doesn't exist, send failure code "F"
+                                ByteBuffer failureReply = ByteBuffer.wrap("F".getBytes());
+                                serveChannel.write(failureReply);
+                            }
+                            serveChannel.shutdownOutput();
+                            break;
+
+                        case "R": // Rename file
+                            byte[] r = new byte[request.remaining()];
+                            request.get(r);
+                            String receivedString = new String(r).trim(); // Convert byte array to string and trim whitespace
+
+                            // Split the received string by a comma to get the original and new filenames
+                            String[] filenames = receivedString.split(",");
+
+                            // Ensure the split resulted in exactly two filenames (original and new)
+                            if (filenames.length != 2) {
+                                System.err.println("Invalid input: Expected two filenames separated by a comma");
+                                ByteBuffer errorReply = ByteBuffer.wrap("F".getBytes()); // Send failure code
+                                serveChannel.write(errorReply);
+                                serveChannel.shutdownOutput();
+                                break;
+                            }
+
+                            // Extract and trim the filenames
+                            String ogFilename = filenames[0].trim();
+                            String newFileName = filenames[1].trim();
+
+                            // Define file paths based on the ServerFiles directory
+                            File rfile = new File("ServerFiles/" + ogFilename);
+                            File rfilenew = new File("ServerFiles/" + newFileName);
+
+                            String rreplymessage;
+
+                            // Check if the original file exists and attempt to rename it
+                            if (rfile.exists() && rfile.isFile()) {
+                                boolean rsuccess = rfile.renameTo(rfilenew);
+                                rreplymessage = rsuccess ? "S" : "F"; // Rename success/failure
+                            } else {
+                                rreplymessage = "F"; // Original file does not exist
+                            }
+
+                            // Send the response back to the client
+                            ByteBuffer rreply = ByteBuffer.wrap(rreplymessage.getBytes());
+                            serveChannel.write(rreply);
+                            serveChannel.shutdownOutput();
+                            break;
+
+                        case "U": // Upload file
+                            byte[] u = new byte[request.remaining()];
+                            request.get(u);
+                            String uFilename = new String(u).trim();
+
+                            // Ensure directories and create the file output stream
+                            String fileSavePath = "ServerFiles/" + uFilename;
+                            File directory = new File("ServerFiles");
+                            if (!directory.exists()) {
+                                directory.mkdirs();
+                            }
+
+                            try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(fileSavePath))) {
+                                // Buffer to read file data from the client
+                                ByteBuffer fileDataBuffer = ByteBuffer.allocate(1024);
+                                int bytesRead;
+
+                                while ((bytesRead = serveChannel.read(fileDataBuffer)) > 0) {
+                                    fileDataBuffer.flip(); // Prepare buffer for reading
+                                    byte[] datapacket = new byte[fileDataBuffer.remaining()];
+                                    fileDataBuffer.get(datapacket);
+                                    fos.write(datapacket);
+                                    fileDataBuffer.clear(); // Clear buffer for the next read
+                                }
+
+                                // Confirm file upload success
+                                File uploadedFile = new File(fileSavePath);
+                                String ureplyMessage = uploadedFile.exists() ? "S" : "F";
+                                ByteBuffer ureply = ByteBuffer.wrap(ureplyMessage.getBytes());
+                                serveChannel.write(ureply);
+
+                            } catch (IOException e) {
+                                System.err.println("File write error: " + e.getMessage());
+                                ByteBuffer errorReply = ByteBuffer.wrap("F".getBytes());
+                                serveChannel.write(errorReply);
+                            }
+
+                            serveChannel.shutdownOutput();
+                            break;
+
+                        case "G":  // Download file
+                            byte[] G = new byte[request.remaining()];
+                            request.get(G);
+                            String GFilename = new String(G).trim();
+                            File gfile = new File("ServerFiles/" + GFilename);
+
+                            if (!gfile.exists() || !gfile.isFile()) {
+                                ByteBuffer greply = ByteBuffer.wrap("F".getBytes());
+                                serveChannel.write(greply);
+                                serveChannel.shutdownOutput();
+                                break;
+                            }
+
+                            try (FileInputStream gfis = new FileInputStream(gfile)) {
+                                byte[] gbuffer = new byte[1024];
+                                int dbytesRead;
+                                while ((dbytesRead = gfis.read(gbuffer)) > 0) {
+                                    ByteBuffer fileData = ByteBuffer.wrap(gbuffer, 0, dbytesRead);
+                                    serveChannel.write(fileData);
+                                }
+
+                                ByteBuffer greply = ByteBuffer.wrap("S".getBytes());
+                                serveChannel.write(greply);
+                                serveChannel.shutdownOutput();
+
+                            } catch (IOException e) {
+                                System.err.println("File read error: " + e.getMessage());
+                                ByteBuffer errorReply = ByteBuffer.wrap("F".getBytes());
+                                serveChannel.write(errorReply);
+                                serveChannel.shutdownOutput();
+                            }
+                            break;
+
+                        default:
+                            System.out.println("Invalid Command");
+                            serveChannel.shutdownOutput();
+                            break;
                     }
-                    String replymessage;
-                    if(sucess){
-                        replymessage = "S";
-
-                    }
-                    else{
-                        replymessage = "F";
-
-                    }
-                    ByteBuffer reply = ByteBuffer.wrap(replymessage.getBytes());
-                    serveChannel.write(reply);
-                    serveChannel.close();
-
-
-
-                    break;
-                case "L":
-                    File serverFolder = new File("ServerFiles");
-                    File[] files = serverFolder.listFiles();
-                    String serverResponseL;
-
-                    if (files != null && files.length > 0) {
-                        // Convert the file list to a string
-                        ArrayList<File> listOfServerFiles = new ArrayList<>(Arrays.asList(files));
-                        String fileListString = listOfServerFiles.toString();
-
-                        // Send success code "S" first
-                        serverResponseL = "S";
-                        ByteBuffer successReply = ByteBuffer.wrap(serverResponseL.getBytes());
-                        serveChannel.write(successReply);
-
-                        // Send the file list as a second response
-                        ByteBuffer fileListReply = ByteBuffer.wrap(fileListString.getBytes());
-                        serveChannel.write(fileListReply);
-
-                        // Close the channel properly
-                        serveChannel.shutdownOutput();
-                        serveChannel.close();
-                    } else {
-                        // If no files or folder doesn't exist, send failure code "F"
-                        serverResponseL = "F";
-                        ByteBuffer failureReply = ByteBuffer.wrap(serverResponseL.getBytes());
-                        serveChannel.write(failureReply);
-
-                        // Close the channel properly
-                        serveChannel.shutdownOutput();
-                        serveChannel.close();
-                    }
-                    break;
-
-                case "R":
-                byte[]r= new byte[request.remaining()];
-                request.get(r);
-                String[] filenames = new String(r).split(","); 
-                String ogFilename = filenames[0].trim();
-                String newFileName = filenames[1].trim();
-                File rfile = new File("ServerFiles/"+ogFilename);
-                File rfilenew = new File("ServerFiles/"+newFileName);
-                
-                String rreplymessage;
-               
-                if(rfile.exists()){
-                    boolean rsucess = rfile.renameTo(rfilenew); 
-                    if(rsucess){
-                        rreplymessage = "S";
-    
-                    }
-                    else{
-                        rreplymessage = "F";
-    
-                    }}
-                else {
-                    rreplymessage = "F"; 
                 }
-                ByteBuffer rreply = ByteBuffer.wrap(rreplymessage.getBytes());
-                serveChannel.write(rreply);
-                serveChannel.close();
-                break;
-                
-                
-                
-                
-                case "U": // upload
-
-                byte[]u= new byte[request.remaining()];
-                request.get(u);
-              
-                String uFilename = new String(u);
-                BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream("ServerFiles/" + new String(uFilename)));
-
-                int bytesRead = 0;
-                ByteBuffer fileDataBuffer = ByteBuffer.allocate(1024); 
-              
-                while((bytesRead = serveChannel.read(fileDataBuffer))>0){
-                    fileDataBuffer.flip();
-                    byte[] datapacket = new byte[bytesRead];
-                    fileDataBuffer.get(datapacket);
-                    fos.write(datapacket);
-            
-                    fileDataBuffer.clear();
-    
-    
-                }
-                fos.close();
-                
-
-            File w = new File("ServerFiles/" + new String(uFilename)); 
-  
-             String ureplys;
-               
-                if(w.exists()){
-                    ureplys = "S";
-                }
-                else{
-                    ureplys = "F";
-                }
-
-                ByteBuffer ureply = ByteBuffer.wrap(ureplys.getBytes());
-                serveChannel.write(ureply);
-                serveChannel.close();
-                
-               
-                    break;
-                case "G":  // download
-                String greplys;
-
-                byte[]G= new byte[request.remaining()];
-                request.get(G);
-                String GFilename = new String(G);
-                File gfile = new File("ServerFiles/" + GFilename);
-
-                if (!gfile.exists()) {
-                    greplys = "F";
-                    System.out.println("File does not exist.");
-                    ByteBuffer greply = ByteBuffer.wrap(greplys.getBytes());
-                    serveChannel.write(greply);
-                    serveChannel.close();
-
-                    break;
-                }
-
-               
-                
-                FileInputStream gfis = new FileInputStream(GFilename);
-               
-
-              
-                byte[] gbuffer = new byte[1024];
-                int dbytesRead;
-                while ((dbytesRead = gfis.read(gbuffer)) > 0) {
-                    ByteBuffer fileData = ByteBuffer.wrap(gbuffer, 0, dbytesRead);
-                    serveChannel.write(fileData);
-                    //fileData.clear();
-                }
-                gfis.close();
-                
-
-               
-
-                
-               
-                
-                greplys = "S";
-                
-                
-
-                ByteBuffer greply = ByteBuffer.wrap(greplys.getBytes());
-                serveChannel.write(greply);
-                serveChannel.shutdownOutput();
-                serveChannel.close();
-
-
-
-                
-                  
-              
-           
-                break;
-                default:
-                    System.out.println("Invalid Command");
+            } catch (IOException e) {
+                System.err.println("Error during communication: " + e.getMessage());
             }
-
         }
-    
-
     }
 }
-}
-
