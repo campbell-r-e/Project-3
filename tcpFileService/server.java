@@ -46,20 +46,18 @@ public class server {
                             byte[] d = new byte[request.remaining()];
                             request.get(d);
                             String Filename = new String(d).trim();  // Added trimming for safety
+                            Filename.split("|");
                             System.out.println("File to delete: " + Filename);
-
                             File file = new File("ServerFiles/" + Filename);
                             Boolean success = false;
                             if (file.exists() && file.isFile()) {
                                 success = file.delete();
                             }
-
                             String replymessage = success ? "S" : "F";
                             ByteBuffer reply = ByteBuffer.wrap(replymessage.getBytes());
                             serveChannel.write(reply);
                             serveChannel.shutdownOutput();
                             break;
-
                         case "L":
                             File serverFolder = new File("ServerFiles");
                             if (!serverFolder.exists() || !serverFolder.isDirectory()) {
@@ -101,7 +99,7 @@ public class server {
                             String receivedString = new String(r).trim(); // Convert byte array to string and trim whitespace
 
                             // Split the received string by a comma to get the original and new filenames
-                            String[] filenames = receivedString.split("\\|");
+                            String[] filenames = receivedString.split("|");
 
                             // Ensure the split resulted in exactly two filenames (original and new)
                             if (filenames.length != 2) {
@@ -149,6 +147,7 @@ public class server {
                             
                            
                             String uFilename = new String(u);
+                            uFilename.split("|");
                             System.out.println(uFilename);
 
                             // Ensure directories and create the file output stream
@@ -199,6 +198,7 @@ public class server {
                             byte[] G = new byte[request.remaining()];
                             request.get(G);
                             String GFilename = new String(G).trim();
+                            GFilename.split("|");
                             File gfile = new File("ServerFiles/" + GFilename);
 
                             if (!gfile.exists() || !gfile.isFile()) {
