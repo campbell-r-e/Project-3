@@ -136,13 +136,23 @@ public class server {
                             break;
 
                         case "U": // Upload file
+                            
                             byte[] u = new byte[request.remaining()];
+                            
                             request.get(u);
+                           
+                            
+                            
+                            
+                           
                             String uFilename = new String(u).trim();
+                            System.out.println(uFilename);
 
                             // Ensure directories and create the file output stream
                             //String fileSavePath = "ServerFiles" + uFilename;  // used to have /
                             String fileSavePath = "ServerFiles/" + uFilename;
+                           // System.out.println(fileSavePath);
+                            //File file2= new File("ServerFiles/" + uFilename);
                             File directory = new File("ServerFiles");
                             if(!directory.exists()){
                                 directory.mkdir();
@@ -156,16 +166,21 @@ public class server {
                                     fileDataBuffer.flip(); // Prepare buffer for reading
                                     byte[] datapacket = new byte[fileDataBuffer.remaining()];
                                     fileDataBuffer.get(datapacket);
+                                    String receivedData = new String(datapacket).trim();
+                                    //System.out.println(receivedData);
+                                  
                                     fos.write(datapacket);
                                     fileDataBuffer.clear(); // Clear buffer for the next read
                                 }
 
                                 // Confirm file upload success
+                                //File uploadedFile = new File(fileSavePath);
                                 File uploadedFile = new File(fileSavePath);
-                                
                                 String ureplyMessage = uploadedFile.exists() ? "S" : "F";
+                               
                                 ByteBuffer ureply = ByteBuffer.wrap(ureplyMessage.getBytes());
                                 serveChannel.write(ureply);
+                                serveChannel.shutdownOutput();
 
                             } catch (IOException e) {
                                 System.err.println("File write error: " + e.getMessage());
@@ -174,7 +189,7 @@ public class server {
                                 e.printStackTrace();
                             }
 
-                            serveChannel.shutdownOutput();
+                            
                             break;
 
                         case "G":  // Download file
