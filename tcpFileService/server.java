@@ -139,24 +139,16 @@ public class server {
                         case "U": // Upload file
                             
                             byte[] u = new byte[request.remaining()];
-                            byte w;
-                            byte[]finals=new byte[1];
-                            for(int x=0;x<=2;x++){
-                              w=u[x];
-                              for (int i = 0; i < finals.length; i++) {
-                                finals[i] = (byte) (w); // Example values: 0, 10, 20, 30, 40
-                            }
-
-                            }
+                            
                            
                             
-                            request.get(finals);
+                            request.get(u);
                            
                             
                             
                             
                            
-                            String uFilename = new String(finals);
+                            String uFilename = new String(u);
                             System.out.println(uFilename);
 
                             // Ensure directories and create the file output stream
