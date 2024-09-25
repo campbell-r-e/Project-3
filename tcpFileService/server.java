@@ -113,11 +113,9 @@ public class server {
                             // Extract and trim the filenames
                             String ogFilename = filenames[0].trim();
                             String newFileName = filenames[1].trim();
-
                             // Define file paths based on the ServerFiles directory
                             File rfile = new File("ServerFiles/" + ogFilename);
                             File rfilenew = new File("ServerFiles/" + newFileName);
-
                             String rreplymessage;
 
                             // Check if the original file exists and attempt to rename it
@@ -127,7 +125,6 @@ public class server {
                             } else {
                                 rreplymessage = "F"; // Original file does not exist
                             }
-
                             // Send the response back to the client
                             ByteBuffer rreply = ByteBuffer.wrap(rreplymessage.getBytes());
                             serveChannel.write(rreply);
@@ -135,21 +132,13 @@ public class server {
                             break;
 
                         case "U": // Upload file
-                            
                             byte[] u = new byte[request.remaining()];
-                            
-                           
-                            
                             request.get(u);
-                           
-                            
-                            
-                            
-                           
                             String uFilename = new String(u);
-                            uFilename.split("|");
-                            System.out.println(uFilename);
-
+                            String[]array=uFilename.split("|",2);
+                            for(String a:array){
+                                System.out.println(a);
+                            }
                             // Ensure directories and create the file output stream
                             //String fileSavePath = "ServerFiles" + uFilename;  // used to have /
                             String fileSavePath = "ServerFiles/" + uFilename;
@@ -163,37 +152,29 @@ public class server {
                                 // Buffer to read file data from the client
                                 ByteBuffer fileDataBuffer = ByteBuffer.allocate(1024);
                                 int bytesRead;
-
                                 while ((bytesRead = serveChannel.read(fileDataBuffer)) > 0) {
                                     fileDataBuffer.flip(); // Prepare buffer for reading
                                     byte[] datapacket = new byte[fileDataBuffer.remaining()];
                                     fileDataBuffer.get(datapacket);
                                     String receivedData = new String(datapacket).trim();
                                     //System.out.println(receivedData);
-                                  
                                     fos.write(datapacket);
                                     fileDataBuffer.clear(); // Clear buffer for the next read
                                 }
-
                                 // Confirm file upload success
                                 //File uploadedFile = new File(fileSavePath);
                                 File uploadedFile = new File("ServerFiles/" + uFilename);
                                 String ureplyMessage = uploadedFile.exists() ? "S" : "F";
-                               
                                 ByteBuffer ureply = ByteBuffer.wrap(ureplyMessage.getBytes(StandardCharsets.UTF_8));
                                 serveChannel.write(ureply);
                                 serveChannel.shutdownOutput();
-
                             } catch (IOException e) {
                                 System.err.println("File write error: " + e.getMessage());
                                 ByteBuffer errorReply = ByteBuffer.wrap("F".getBytes(StandardCharsets.UTF_8));
                                 serveChannel.write(errorReply);
                                 e.printStackTrace();
                             }
-
-                            
                             break;
-
                         case "G":  // Download file
                             byte[] G = new byte[request.remaining()];
                             request.get(G);
