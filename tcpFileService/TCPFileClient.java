@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class TCPFileClient {
@@ -137,10 +138,12 @@ public class TCPFileClient {
                         uploadChannel.connect(new InetSocketAddress(args[0], serverPort));
 
                         String uploadHeader = "U" + fileToUpload;
-                        ByteBuffer header = ByteBuffer.wrap(uploadHeader.getBytes());
+                        ByteBuffer header = ByteBuffer.wrap(uploadHeader.getBytes(StandardCharsets.UTF_8));
                         uploadChannel.write(header);
+                        
 
                         byte[] buffer = new byte[1024];
+                      
                         int bytesRead;
                         while ((bytesRead = fis.read(buffer)) > 0) {
                             ByteBuffer fileData = ByteBuffer.wrap(buffer, 0, bytesRead);

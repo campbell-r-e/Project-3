@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.Delayed;
 //import java.util.Arrays;
@@ -138,14 +139,24 @@ public class server {
                         case "U": // Upload file
                             
                             byte[] u = new byte[request.remaining()];
+                            byte w;
+                            byte[]finals=new byte[1];
+                            for(int x=0;x<=2;x++){
+                              w=u[x];
+                              for (int i = 0; i < finals.length; i++) {
+                                finals[i] = (byte) (w); // Example values: 0, 10, 20, 30, 40
+                            }
+
+                            }
+                           
                             
-                            request.get(u);
+                            request.get(finals);
                            
                             
                             
                             
                            
-                            String uFilename = new String(u).trim();
+                            String uFilename = new String(finals);
                             System.out.println(uFilename);
 
                             // Ensure directories and create the file output stream
@@ -175,16 +186,16 @@ public class server {
 
                                 // Confirm file upload success
                                 //File uploadedFile = new File(fileSavePath);
-                                File uploadedFile = new File(fileSavePath);
+                                File uploadedFile = new File("ServerFiles/" + uFilename);
                                 String ureplyMessage = uploadedFile.exists() ? "S" : "F";
                                
-                                ByteBuffer ureply = ByteBuffer.wrap(ureplyMessage.getBytes());
+                                ByteBuffer ureply = ByteBuffer.wrap(ureplyMessage.getBytes(StandardCharsets.UTF_8));
                                 serveChannel.write(ureply);
                                 serveChannel.shutdownOutput();
 
                             } catch (IOException e) {
                                 System.err.println("File write error: " + e.getMessage());
-                                ByteBuffer errorReply = ByteBuffer.wrap("F".getBytes());
+                                ByteBuffer errorReply = ByteBuffer.wrap("F".getBytes(StandardCharsets.UTF_8));
                                 serveChannel.write(errorReply);
                                 e.printStackTrace();
                             }
