@@ -137,19 +137,22 @@ public class server {
 
                             // Convert the byte array to a string and split using the "|" delimiter.
                             String uFilename = new String(u, StandardCharsets.UTF_8);
-                            String[] array = uFilename.split("\\|", 2); // Escaping "|" as it's a regex special character
+                            String[] array = uFilename.split("\\|", 3); // Escaping "|" as it's a regex special character
 
-                            if (array.length == 2) {
-                                String filePath = array[0]; // The first part (path)
+                            if (array.length == 3) {
+                                //String filePath = array[0].trim(); // The first part (path)
                                 String fileName = array[1]; // The second part (filename)
+                                
+
+                                
 
                                 // Print the path and filename to verify
-                                System.out.println("File Path: " + filePath);
+                                //System.out.println("File Path: " + filePath);
                                 System.out.println("File Name: " + fileName);
 
                                 // Ensure directories and create the file output stream
-                                String fileSavePath = "ServerFiles/" + filePath + "/" + fileName;
-                                File directory = new File("ServerFiles/" + filePath);
+                                String fileSavePath = "ServerFiles/"+fileName;
+                                File directory = new File("ServerFiles/");
 
                                 // Create directory if it doesn't exist
                                 if (!directory.exists()) {
@@ -164,9 +167,11 @@ public class server {
                                         fileDataBuffer.flip(); // Prepare buffer for reading
                                         byte[] datapacket = new byte[fileDataBuffer.remaining()];
                                         fileDataBuffer.get(datapacket);
-                                        fos.write(datapacket); // Write to the file output stream
+                                        fos.write(fileDataBuffer.array(), 0, bytesRead);
                                         fileDataBuffer.clear(); // Clear buffer for the next read
+                                       
                                     }
+                                   
 
                                     // Confirm file upload success
                                     File uploadedFile = new File(fileSavePath);

@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
@@ -125,7 +125,7 @@ public class TCPFileClient {
                 case "U": // upload
                     System.out.println("Enter File Name: ");
                     String fileToUpload = keyboard.nextLine();
-                    File file = new File("ClientFiles/" + fileToUpload);  // Prepend directory "ClientFiles/"
+                    File file = new File("ClientFiles/"+fileToUpload);  // Prepend directory "ClientFiles/"
 
                     if (!file.exists()) {
                         System.out.println("File does not exist.");
@@ -137,7 +137,7 @@ public class TCPFileClient {
 
                         uploadChannel.connect(new InetSocketAddress(args[0], serverPort));
 
-                        String uploadHeader = "U" + "|" + fileToUpload;
+                        String uploadHeader = "U|"+ fileToUpload+"|";
                         ByteBuffer header = ByteBuffer.wrap(uploadHeader.getBytes(StandardCharsets.UTF_8));
                         uploadChannel.write(header);
                         
@@ -147,12 +147,11 @@ public class TCPFileClient {
                         int bytesRead;
                         while ((bytesRead = fis.read(buffer)) > 0) {
                             ByteBuffer fileData = ByteBuffer.wrap(buffer, 0, bytesRead);
-                            while (fileData.hasRemaining()) {
-                                uploadChannel.write(fileData);
-                            }
+                            uploadChannel.write(fileData);
                         }
-
                         uploadChannel.shutdownOutput();
+
+                        
 
                         ByteBuffer uploadReply = ByteBuffer.allocate(1);
                         if (uploadChannel.read(uploadReply) > 0) {
@@ -169,6 +168,7 @@ public class TCPFileClient {
                                 System.out.println("Invalid server code received.");
                             }
                         }
+                        
                     } catch (IOException e) {
                         System.err.println("Error during file upload: " + e.getMessage());
                     }
