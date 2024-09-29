@@ -150,8 +150,7 @@ public class TCPFileClient {
                             uploadChannel.write(fileData);
                         }
                         uploadChannel.shutdownOutput();
-
-                        
+                       //
 
                         ByteBuffer uploadReply = ByteBuffer.allocate(1);
                         if (uploadChannel.read(uploadReply) > 0) {

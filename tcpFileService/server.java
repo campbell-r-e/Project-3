@@ -165,14 +165,15 @@ public class server {
                                     int bytesRead;
                                     while ((bytesRead = serveChannel.read(fileDataBuffer)) > 0) {
                                         fileDataBuffer.flip(); // Prepare buffer for reading
-                                        byte[] datapacket = new byte[fileDataBuffer.remaining()];
-                                        fileDataBuffer.get(datapacket);
-                                        fos.write(datapacket, 0, bytesRead);
-                                        fileDataBuffer.clear(); // Clear buffer for the next read
+                                        byte[] datapacket = new byte[bytesRead];
+                                        fileDataBuffer.get(datapacket);  // changed
+                                        fos.write(fileDataBuffer.array(), 0, bytesRead);
+                                       fos.flush();
+                                        fileDataBuffer.clear(); // Clear buffer for the next read  changed
+
                                        
                                     }
                                    
-
                                     // Confirm file upload success
                                     File uploadedFile = new File(fileSavePath);
                                     String ureplyMessage = uploadedFile.exists() ? "S" : "F";
