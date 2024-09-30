@@ -137,11 +137,12 @@ public class server {
 
                             // Convert the byte array to a string and split using the "|" delimiter.
                             String uFilename = new String(u, StandardCharsets.UTF_8);
-                            String[] array = uFilename.split("\\|", 2); // Escaping "|" as it's a regex special character
+                            String[] array = uFilename.split("\\|",3); // Escaping "|" as it's a regex special character
 
                             if (array.length == 2) {
                                 String filePath = array[0]; // The first part (path)
                                 String fileName = array[1]; // The second part (filename)
+
 
                                 // Print the path and filename to verify
                                 System.out.println("File Path: " + filePath);
@@ -214,7 +215,7 @@ public class server {
                                 }
                                serveChannel.shutdownOutput();
 
-                             
+
 
                             } catch (IOException e) {
                                 System.err.println("File read error: " + e.getMessage());
@@ -223,6 +224,13 @@ public class server {
                                 serveChannel.shutdownOutput();
                             }
                             break;
+
+                        case "Q":
+                            serveChannel.shutdownOutput();
+                            break;
+
+
+
 
                         default:
                             System.out.println("Invalid Command");

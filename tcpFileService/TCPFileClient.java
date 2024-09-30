@@ -137,7 +137,7 @@ public class TCPFileClient {
 
                         uploadChannel.connect(new InetSocketAddress(args[0], serverPort));
 
-                        String uploadHeader = "U" + "|" + fileToUpload;
+                        String uploadHeader = "U" + "|" + fileToUpload + "|";
                         ByteBuffer header = ByteBuffer.wrap(uploadHeader.getBytes(StandardCharsets.UTF_8));
                         uploadChannel.write(header);
                         
