@@ -227,6 +227,7 @@ public class server {
 
                         case "Q":
                             serveChannel.shutdownOutput();
+                            System.exit(0);
                             break;
 
 
